@@ -4,4 +4,8 @@
 	1、java中serial_util.java、serialport_JNI.java为串口实际相关  
 	2、serial_util.java是serialport_JNI.java的封装
 	3、serialport_JNI.java为jni的java部分 用来加载c库
-	4、MainActivity.java是app的实现部分
+
+
+主要参考文章：
+	1）https://blog.csdn.net/u010312949/article/details/80199018
+	2）https://www.jb51.net/article/138350.htm
