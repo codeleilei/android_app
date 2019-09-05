@@ -2,12 +2,17 @@ package com.example.serialtool;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.os.SystemClock.sleep;
 
 public class MainActivity extends AppCompatActivity {
     private Button bt1,bt2,bt3,bt4= null;
@@ -15,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tv1= null;
     private EditText ed1,ed2=null;
     private serial_util serial;
-    public String path = "/dev/ttyXRM0";
+    public String path ;
     public int baudrate = 115200;
 
     @Override
@@ -26,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
         view_init();
         serial = new serial_util();
 
+        showSoftInputFromWindow(this,ed2);
+        showSoftInputFromWindow(this,ed1);
+
         /*add listener*/
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
                 tv1.setText("");
             }
         });
-
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,18 +62,22 @@ public class MainActivity extends AppCompatActivity {
         bt4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean state=false;
                 if (bt4.getText().equals("打开串口")) {
                     if(!ed2.getText().toString().equals(null))
-                        //path = ed2.getText().toString();
-                        ;
+                        path = ed2.getText().toString();
+                    Toast.makeText(getApplicationContext(), "正在打开串口", Toast.LENGTH_SHORT).show();
+                    sleep(100);
+                    bt4.setText("关闭串口");
                     try {
                         serial.OpenSerialport(path, baudrate);
-                        bt4.setText("关闭串口");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else {
                     serial.closeSerialPort();
+                    Toast.makeText(getApplicationContext(), "正在关闭串口", Toast.LENGTH_SHORT).show();
+                    sleep(100);
                     bt4.setText("打开串口");
                 }
             }
@@ -92,6 +103,15 @@ public class MainActivity extends AppCompatActivity {
 
         ed1 = (EditText) findViewById(R.id.editText);
         ed2 = (EditText) findViewById(R.id.editText2);
+    }
+    /**
+     * EditText获取焦点并显示软键盘
+     */
+    public static void showSoftInputFromWindow(Activity activity, EditText editText) {
+        editText.setFocusable(true);
+        editText.setFocusableInTouchMode(true);
+        editText.requestFocus();
+        activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
 
