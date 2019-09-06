@@ -1,5 +1,16 @@
 package com.example.serialtool;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewDebug;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,17 +30,22 @@ public class serial_util {
     private ReadThread mReadThread;
     private OnDataReceiveListener onDataReceiveListener = null;
     private boolean isStop = false;
+    public  Handler myHandler;
+    public static String buffer_show="";
 
+    public serial_util(Handler myHandler)
+    {
+        this.myHandler=myHandler;
+    }
     public interface OnDataReceiveListener {
         public void onDataReceive(byte[] buffer, int size);
     }
 
-    private void getSerialPort() {
-        if (mReadThread == null) {
 
-            mReadThread = new ReadThread();
-        }
+    private void getSerialPort() {
+        mReadThread = new ReadThread();
         mReadThread.start();
+        isStop=false;
     }
     /**
      * 初始化串口信息
@@ -39,7 +55,6 @@ public class serial_util {
             mSerialPort = new serialport_JNI(new File(path), baudrate);
             mOutputStream = mSerialPort.getOutputStream();
             mInputStream = mSerialPort.getInputStream();
-            ;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,15 +64,15 @@ public class serial_util {
     /**
      * 发送指令到串口
      *
-     * @param date
+     * @param Data
      * @return
      */
-    public boolean SendDate(String date) {
+    public boolean SendDate(byte[] Data) {
         boolean result = true;
-        byte[] sendData  = (date+"\r\n").getBytes();
+
         try {
             if (mOutputStream != null) {
-                mOutputStream.write(sendData);
+                mOutputStream.write(Data);
             } else {
                 result = false;
             }
@@ -93,25 +108,33 @@ public class serial_util {
         @Override
         public void run() {
             super.run();
-            while (!isStop && !isInterrupted()) {
-                int size;
-                try {
-                    if (mInputStream == null)
-                        return;
-                    byte[] buffer = new byte[1024];
-                    size = mInputStream.read(buffer);
-                    if (size > 0) {
-                        /*need add some message to show data on ui*/
-                        /* wait to add*/
-                        /*add_end*/
-                        if (null != onDataReceiveListener) {
-                            onDataReceiveListener.onDataReceive(buffer, size);
-                        }
-                    }
-                    Thread.sleep(10);  //receive data reflesh time
-                } catch (Exception e) {
-                    e.printStackTrace();
+            while (true) {
+                if (this.isInterrupted()) {
+                    Log.e("cl", "停止了！");
                     return;
+                }
+                while (!isStop) {//&& !isInterrupted()
+                    int size;
+                    try {
+                        if (mInputStream == null)
+                            return;
+                        byte[] buffer = new byte[1024];
+                        size = mInputStream.read(buffer);
+                        String s = String.valueOf(size);
+                        if (size > 0) {
+                        /*发送消息给主线程 告知它处理事件*/
+                            {
+                                buffer_show += new String(buffer, 0, size, "UTF-8");
+                                Message msg = new Message();// 消息
+                                msg.what = 0x01;// 消息类别
+                                myHandler.sendMessage(msg);
+                            }
+                        }
+                        //Thread.sleep(10);  //receive data reflesh time
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return;
+                    }
                 }
             }
         }
@@ -122,11 +145,23 @@ public class serial_util {
      */
     public void closeSerialPort() {
         isStop = true;
-        if (mReadThread != null) {
-            mReadThread.interrupt();
-        }
+
+            if (mReadThread != null) {
+                    mReadThread.interrupt();
+            }
         if (mSerialPort != null) {
             mSerialPort.close();
+        }
+
+        try {
+            if (mInputStream != null) {
+                mInputStream.close();
+            }
+            if (mOutputStream != null) {
+                mOutputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
