@@ -7,7 +7,7 @@
 
 3）
 	libs文档就是生成的各个架构的.so文件
-
+	layout 是布局文件xml
  
 主要参考文章：
 	1）https://blog.csdn.net/u010312949/article/details/80199018
