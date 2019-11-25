@@ -3,10 +3,13 @@ package com.c.screenshot_ser;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -16,11 +19,21 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
 public class screenshot extends Service {
     private String  TAG =" test";
-    private boolean flag_true=false;
+    private static String  pre_data="test";//增加pre_data 用来记录前一次的信息   防止误触导致弹屏
+    private boolean flag=true;     //pre_data和flag用于屏蔽第一次 莫名的触发
     private static final String[] KEYWORDS = {
-            "screenshot", "screen_shot", "screen-shot", "screen shot",
+            "hdshot", "screen_shot", "screen-shot", "screen shot",
             "screencapture", "screen_capture", "screen-capture", "screen capture",
             "screencap", "screen_cap", "screen-cap", "screen cap",".png"
     };
@@ -36,6 +49,8 @@ public class screenshot extends Service {
 
     /** 外部存储器内容观察者 */
     private ContentObserver mExternalObserver;
+    /**数据保存*/
+    SharedPreferences config;
 
     private HandlerThread mHandlerThread;
     private Handler mHandler;
@@ -48,7 +63,11 @@ public class screenshot extends Service {
 
         // 初始化
         mInternalObserver = new MediaContentObserver(MediaStore.Images.Media.INTERNAL_CONTENT_URI, mHandler);
-        mExternalObserver = new MediaContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mHandler);
+       mExternalObserver = new MediaContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mHandler);
+
+        /**数据保存*/
+        config = getSharedPreferences("config", MODE_PRIVATE);
+        pre_data=config.getString("data","");
 
         // 添加监听
         this.getContentResolver().registerContentObserver(
@@ -56,11 +75,18 @@ public class screenshot extends Service {
                 false,
                 mInternalObserver
         );
+
         this.getContentResolver().registerContentObserver(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 false,
                 mExternalObserver
         );
+/*
+       if(pre_data.equals("test")) {
+            Log.e(TAG, " read  pre_data     "+pre_data);
+            pre_data = Read_data();    //开机的时候读取数据
+        }
+*/
     }
 
 
@@ -113,9 +139,7 @@ public class screenshot extends Service {
             long dateTaken = cursor.getLong(dateTakenIndex);
 
             // 处理获取到的第一行数据
-            if(flag_true)
                 handleMediaRowData(data, dateTaken);
-            flag_true=!flag_true;
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -130,11 +154,20 @@ public class screenshot extends Service {
      * 处理监听到的资源
      */
     private void handleMediaRowData(String data, long dateTaken) {
+
+        Log.e(TAG, data + " " + dateTaken);
+        if(pre_data.equals(data)|| (pre_data.equals("test")&& flag)){
+            if(flag) flag=false;
+            return;
+        }
         if (checkScreenShot(data, dateTaken)) {
             Log.e(TAG, data + " " + dateTaken);
             Toast.makeText(getApplicationContext(), "截图成功图片路径 " + data, 0).show();
+            saveData(data);
+            //Write_data(data);   //实时更新数据 防止关机以后丢失pre_data的值
+            pre_data=data;
         } else {
-            Log.d(TAG, "Not screenshot event");
+            Log.e(TAG, "Not screenshot event");
         }
     }
 
@@ -145,10 +178,9 @@ public class screenshot extends Service {
 
         data = data.toLowerCase();
         // 判断图片路径是否含有指定的关键字之一, 如果有, 则认为当前截屏了
-        for (String keyWork : KEYWORDS) {
-            if (data.contains(keyWork)) {
+        //截图格式的关键字 hdshot  格式关键字.png
+        if (data.contains("hdshot")&&data.contains(".png") ) {
                 return true;
-            }
         }
         return false;
     }
@@ -172,4 +204,72 @@ public class screenshot extends Service {
             handleMediaContentChange(mContentUri);
         }
     }
+
+    /*
+    /**
+    **用于写入pre_data的值防止开关机以后数据丢失
+     */
+         public void Write_data(String data){
+             try {
+
+                 File file =new File("/sdcard/11.txt");
+                 FileOutputStream fos = new FileOutputStream(file);//openFileOutput("/data/temp.txt", Context.MODE_PRIVATE);
+
+                 OutputStreamWriter osw =new OutputStreamWriter(fos,"UTF-8");
+
+                 osw.write("1111111");
+                 osw.flush();
+                 fos.flush();
+
+                 osw.close();
+                 fos.close();
+
+                 Log.e(TAG, "Successful");
+             } catch (FileNotFoundException e) {
+                 e.printStackTrace();
+             } catch (IOException e) {
+                 e.printStackTrace();
+             }
+         }
+
+    /**
+     **用于读入pre_data的值防止开关机以后数据丢失
+     */
+    public String Read_data(){
+        try {
+            File file =new File("/sdcard/11.txt");
+            if(!file.exists())
+                file.createNewFile();
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr =new InputStreamReader(fis,"UTF-8");
+            char input[] =new char[fis.available()];
+
+            isr.read(input);
+            isr.close();
+            fis.close();
+
+            String text =new String(input);
+            Log.d(TAG, "Read_data"+text);
+            return text;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    public void saveData(String data) {
+        // 2获取到了编辑器
+        SharedPreferences.Editor edit = config.edit();
+        // 3 保存数据  key -value
+        edit.putString("data",data);
+        //4 保存到文件中
+        //edit.commit(); // 效率慢
+        edit.apply();  // 效率快
+    }
+
+
 }

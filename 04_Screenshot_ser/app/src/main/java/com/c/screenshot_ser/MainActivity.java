@@ -19,12 +19,13 @@ public class MainActivity extends Activity {
        // setContentView(R.layout.activity_main);
         final Intent intent = new Intent(this, screenshot.class);
         startService(intent);
+        //Request();
     }
     protected void onResume() {
         super.onResume();
         this.finish();
     }
-
+/*
     public void Request(){
         // Here, thisActivity is the current activity
         if(ContextCompat.checkSelfPermission(this,
@@ -35,9 +36,11 @@ public class MainActivity extends Activity {
             // No explanation needed, we can request the permission.
             ActivityCompat.requestPermissions(this,
                     new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
                     },
                     1);
         }
     }
+    */
 }
