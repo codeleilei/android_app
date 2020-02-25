@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="plantes">
+        <item>250kbps</item>
+        <item>1000kbps</item>
+        <item>800kbps</item>
+        <item>500kbps</item>
+        <item>125kbps</item>
+        <item>100kbps</item>
+        <item>50kbps</item>
+        <item>20kbps</item>
+        <item>10kbps</item>
+        <item>5kbps</item>
+    </string-array>
+</resources>
