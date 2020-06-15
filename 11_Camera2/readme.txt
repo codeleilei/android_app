@@ -1,0 +1,2 @@
+这是camera的测试程序
+用于打开camera 预览camera拍摄到的画面
