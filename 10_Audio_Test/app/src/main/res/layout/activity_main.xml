@@ -35,6 +35,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/play_button"
             android:text="播放"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/stopplay_button"
+            android:text="停止播放"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

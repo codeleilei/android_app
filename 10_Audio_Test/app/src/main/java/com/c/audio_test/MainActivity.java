@@ -20,15 +20,16 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private final String TAG="Audio Test";
-    private Button bt1,bt2,bt3;
+    private Button bt1,bt2,bt3,bt4;
     private static final int RECORDER_SAMPLERATE = 44100;
-    private static final int RECORDER_CHANNELS_IN = AudioFormat.CHANNEL_IN_MONO;
-    private static final int RECORDER_CHANNELS_OUT = AudioFormat.CHANNEL_OUT_MONO;
+    private static final int RECORDER_CHANNELS_IN = AudioFormat.CHANNEL_IN_STEREO;
+    private static final int RECORDER_CHANNELS_OUT = AudioFormat.CHANNEL_OUT_STEREO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
     private static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
     // Initialize minimum buffer size in bytes.
     private int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE, RECORDER_CHANNELS_IN, RECORDER_AUDIO_ENCODING);
     private AudioRecord recorder = null;
+    private AudioTrack at = null;
     private Thread recordingThread = null;
     private boolean isRecording = false;
     @Override
@@ -42,9 +43,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bt1=(Button)findViewById( R.id.start_button );
         bt2=(Button)findViewById( R.id.stop_button );
         bt3=(Button)findViewById( R.id.play_button );
+        bt4=(Button)findViewById( R.id.stopplay_button );
+
         bt1.setOnClickListener(this);
         bt2.setOnClickListener(this);
         bt3.setOnClickListener(this);
+        bt4.setOnClickListener(this);
     }
 
     private void startRecording() {
@@ -81,12 +85,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 //  writes the data to file from buffer stores the voice buffer
                 os.write(saudioBuffer, 0, bufferSize);
+                Log.e(TAG,"isRecording 11");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        Log.e(TAG,"isRecording 22");
         try {
             os.close();
+            Log.e(TAG,"file make successful");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -99,9 +106,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             recorder.release();
             recorder = null;
             recordingThread = null;
-            PlayShortAudioFileViaAudioTrack("/sdcard/8k16bitMono.pcm");
+            Thread play22= new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        PlayShortAudioFileViaAudioTrack("/sdcard/8k16bitMono.pcm");//8k16bitMono.pcm
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, "Audioplay22 Thread");
+            play22.start();
         }
     }
+
+    private void stopPlaying() throws IOException {
+        //  stops the recording activity
+        if (null != at) {
+            at.stop();
+            at.release();
+            at = null;
+        }
+        if (null != recorder) {
+            isRecording = false;
+            recorder.stop();
+            recorder.release();
+            recorder = null;
+            recordingThread = null;
+        }
+    }
+
     private void PlayShortAudioFileViaAudioTrack(String filePath) throws IOException{
         // We keep temporarily filePath globally as we have only two sample sounds now..
         if (filePath==null)
@@ -122,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Set and push to audio track..
         int intSize = android.media.AudioTrack.getMinBufferSize(RECORDER_SAMPLERATE, RECORDER_CHANNELS_OUT, RECORDER_AUDIO_ENCODING);
         Log.d(TAG, intSize+"");
-        AudioTrack at = new AudioTrack(AudioManager.STREAM_MUSIC, RECORDER_SAMPLERATE, RECORDER_CHANNELS_OUT, RECORDER_AUDIO_ENCODING, intSize, AudioTrack.MODE_STREAM);//MODE_STREAM
+        at = new AudioTrack(AudioManager.STREAM_MUSIC, RECORDER_SAMPLERATE, RECORDER_CHANNELS_OUT, RECORDER_AUDIO_ENCODING, intSize, AudioTrack.MODE_STREAM);//MODE_STREAM
         if (at!=null) {
             at.play();
             // Write the byte array to the track
@@ -148,8 +181,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.play_button:
+
+                     Thread play= new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                PlayShortAudioFileViaAudioTrack("/sdcard/chuchu.wav");//8k16bitMono.pcm
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, "Audioplay Thread");
+                    play.start();
+
+
+                break;
+            case R.id.stopplay_button:
                 try {
-                    PlayShortAudioFileViaAudioTrack("/sdcard/chuchu.wav");//8k16bitMono.pcm
+                    stopPlaying();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
