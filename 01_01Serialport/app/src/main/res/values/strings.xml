@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Serialport</string>
+    <string name="等待接收数据" />
+    <string name="清屏" />
+    <string name="请输入需要发送的数据" />
+    <string name="发送" />
+    <string name="打开串口" />
+</resources>
