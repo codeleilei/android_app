@@ -1,26 +1,10 @@
-ÎïÀíÁ¬½Ó£º
-	Á½¿é°å×Ó¶Ô½Ó£º
-	Á½¿é°å×ÓÉÏµÄcan h+ ¶Ô½ÓH+
-			L- ¶Ô½ÓL-
-
-appÔ­Àí£º£¨Ç°ÌáÊÇipÕâ¸öÃüÁî ÎÒÃÇÓĞÈ¨ÏŞÊ¹ÓÃ£©
-	¿ªÆôcan£º  ÃüÁî£º ip link set canÃû×Ö  up
-	¹Ø±Õcan£º  ÃüÁî£º ip link set canÃû×Ö down
-	ÉèÖÃcan²¨ÌØÂÊ  ÃüÁî£º ip link  set canÃû×Ö  type can bitrate ²¨ÌØÂÊ
-Ö÷ÒªÊÇÕâ¼¸ÌõÃüÁîµÄÊ¹ÓÃ
-
-
-
-1¡¢´ò¿ªappÖ®Ç°ĞèÒªÏÈ¸½Ò»ÏÂipÃüÁîÈ¨ÏŞ
-
-root@android:/ # mount -o remount,rw /system /system
-EXT4-fs (mmcblk0p5): re-mounted. Opts: (null)
-root@android:/ # chmod 4777 /system/bin/ip
-root@android:/ # ls -l /system/bin/ip
--rwsrwxrwx root     shell      149096 2014-05-19 09:02 ip
-root@android:/ #
-
-
-Ö÷ÒªÄ¿µÄ£º ¿ªÆôipÃüÁîµÄÈ¨ÏŞ
-
-
+1ã€é¡¹ç›®è¯´æ˜ ï¼š
+	æ­¤app å®ç°äº†can é€šè®¯çš„åŠŸèƒ½  åŒ…æ‹¬ä¸¤è·¯can  can0å’Œcan1
+	
+2ã€çŸ¥è¯†ç‚¹ï¼š
+	1ï¼‰ä¸»è¦çŸ¥è¯†ç‚¹æ˜¯cané€šè®¯çš„jniæ–‡ä»¶ 
+			jniæ–‡ä»¶åœ¨jniçš„å‹ç¼©æ–‡ä»¶ä¸­ 
+			
+	2ï¼‰éœ€è¦ç†Ÿæ‚‰ jni ä¸­çš„ java åå°„æœºåˆ¶çš„ä½¿ç”¨
+	
+	3ï¼‰éœ€è¦ç†Ÿæ‚‰  linux ä¸­çš„ç½‘ç»œç¼–ç¨‹ è¿™é‡Œæ˜¯cançš„ç½‘ç»œç¼–ç¨‹

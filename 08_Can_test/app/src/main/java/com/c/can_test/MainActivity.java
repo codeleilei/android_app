@@ -46,20 +46,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.set_can_bitrate);
         spinner = (Spinner) findViewById(R.id.Spinner);
 
-        // ����ѡ������ArrayAdapter��������
         adapter = ArrayAdapter.createFromResource(this, R.array.plantes,
                 android.R.layout.simple_spinner_item);
 
-        // ���������б�ķ��
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        // ��adapter2 ��ӵ�spinner��
         spinner.setAdapter(adapter);
 
-        // ����¼�Spinner�¼�����
         spinner.setOnItemSelectedListener(new SpinnerXMLSelectedListener());
 
-        // ����Ĭ��ֵ
         spinner.setVisibility(View.VISIBLE);
 
         startTest = (Button) findViewById(R.id.startTest);
@@ -69,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         startTest.setOnClickListener(new startTestonClickListener());
     }
 
-    // ʹ��XML��ʽ����
+
     class SpinnerXMLSelectedListener implements OnItemSelectedListener {
 
         public void onItemSelected(AdapterView<?> parent, View view,
@@ -127,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
             // TODO Auto-generated method stub
 //            Log.d("MyHandler", "handleMessage......");
             super.handleMessage(msg);
-            // �˴����Ը���UI
 //            Bundle b = msg.getData();
 //            String color = b.getString("color");
 //            MyHandlerActivity.this.button.append(color);
@@ -149,20 +143,15 @@ public class MainActivity extends AppCompatActivity {
             {
                 isContinueRevCan0 = false;
                 isContinueRevCan1 = false;
-//				try {
-//					new Thread().sleep(1000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
             }
-            if(!isContinueRevCan1)
+            if(!isContinueRevCan0)
             {
-                isContinueRevCan1 = true;
-                revCan1 = new Rev(CAN1DATE, can1Operatirn);
-                Toast.makeText(getApplicationContext(), "can1开启读", Toast.LENGTH_SHORT).show();
-                revCan1.start();
+                isContinueRevCan0 = true;
+                revCan0 = new Rev(CAN0DATE, can0Operatirn);
+                revCan0.start();
+                Toast.makeText(getApplicationContext(), "can0开启读", Toast.LENGTH_SHORT).show();
             }
+
             String sendBuff = can0SendText.getText().toString();
             int dataLen = sendBuff.length();
             int frameLen = dataLen % 8 == 0 ? dataLen / 8 : dataLen / 8 + 1;
@@ -177,18 +166,14 @@ public class MainActivity extends AppCompatActivity {
             {
                 isContinueRevCan1 = false;
                 isContinueRevCan0 = false;
-//				try {
-//					new Thread().sleep(1000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+
             }
-            if(!isContinueRevCan0)
+            if(!isContinueRevCan1)
             {
-                isContinueRevCan0 = true;
-                revCan0 = new Rev(CAN0DATE, can0Operatirn);
-                revCan0.start();
+                isContinueRevCan1 = true;
+                revCan1 = new Rev(CAN1DATE, can1Operatirn);
+                Toast.makeText(getApplicationContext(), "can1开启读", Toast.LENGTH_SHORT).show();
+                revCan1.start();
             }
             String sendBuff = can1SendText.getText().toString();
             int dataLen = sendBuff.length();
@@ -210,19 +195,25 @@ public class MainActivity extends AppCompatActivity {
             can1Send = (Button) findViewById(R.id.can1Send);
             can0Send.setOnClickListener(new can0SendOnClickListener());
             can1Send.setOnClickListener(new can1SendOnClickListener());
-            can0Operatirn = new CanOperation("can0", bitrate);
-            can1Operatirn = new CanOperation("can1", bitrate);
+
+
             can0RecvText.setMovementMethod(ScrollingMovementMethod
                     .getInstance());
             can0RecvText.setSelection(can0RecvText.getText().length(),
                     can0RecvText.getText().length());
+
             can1RecvText.setMovementMethod(ScrollingMovementMethod
                     .getInstance());
+            /*move to bottom of textview*/
             can1RecvText.setSelection(can1RecvText.getText().length(),
                     can1RecvText.getText().length());
 
             myHandler = new MyHandler();
+            /*初始化can*/
+            can0Operatirn = new CanOperation("can0", bitrate);
+            can1Operatirn = new CanOperation("can1", bitrate);
 
+            /*初始化 接受线程*/
             System.out.println("bitrate:" + bitrate);
             revCan0 = new Rev(CAN0DATE, can0Operatirn);
             revCan1 = new Rev(CAN1DATE, can1Operatirn);
@@ -246,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void run() {
-            System.out.println("����CAN" + canType + "�����߳�");
+            System.out.println("CAN：" + canType + "接收线程启动");
             //Toast.makeText(getApplicationContext(), "run", Toast.LENGTH_SHORT).show();
             CanNormalFrame buff[] = new CanNormalFrame[1];
             buff[0] = new CanNormalFrame();
@@ -264,16 +255,14 @@ public class MainActivity extends AppCompatActivity {
                     if(!isContinueRevCan1)
                         return;
                 }
-                // ������û�д������󽫻᷵��-2
-                //canOperatirnд��can0Operatirn������
+
                 System.out.println("CanOperationRead   read start!!!!");
+                /*读取 can 数据*/
                 int recvLen = canOperatirn.CanOperationRead(buff, 100);
-                //Toast.makeText(getApplicationContext(), "canOperatirn"+recvLen, Toast.LENGTH_SHORT).show();
-				System.out.println("recvLen��"+recvLen);
+
                 if (recvLen > 0) {
                     Message msg = new Message();
                     msg.what = canType;
-                    System.out.println("�������ݴ���:" + recvLen);
                     msg.obj = buff[0].printfCanNormalFrame();
                     System.out.println("buff[0].printfCanNormalFrame()"+buff[0].printfCanNormalFrame());
                     myHandler.sendMessage(msg);

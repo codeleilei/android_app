@@ -1,7 +1,14 @@
 package imax.can;
 
 import android.R.integer;
+import android.util.Log;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
+/**
+ * CAN 帧的封装类
+ * */
 public class CanNormalFrame {
 	private int StdId;	//标准帧
 	private int ExtId;	//扩展帧
@@ -11,18 +18,24 @@ public class CanNormalFrame {
 	private short[] mData = new short[8];
 	public String printfCanNormalFrame()
 	{
-		String message = "stdId:"+Integer.toHexString(this.StdId)+","+
+		Log.e("cl----","message length:"+ mData.length);
+		String message = Arrays.toString( mData)+'\n';
+/*
+				"stdId:"+Integer.toHexString(this.StdId)+","+
 				"ExtId:"+Integer.toHexString(this.ExtId)+"\n"+"IDE:"+this.IDE+","+
-				"RTR:"+this.RTR+","+"Can_DLC:"+this.Can_DLC+"\n";
+				"RTR:"+this.RTR+","+"Can_DLC :"+this.Can_DLC+"\n";
+
+
 		int z;
 		 StringBuffer  tStringBuf=new StringBuffer ();
 		for(z=0; z<this.Can_DLC-1; z++)
 		{
 			tStringBuf.append((char)this.mData[z]);
-			tStringBuf.append(',');
+			//tStringBuf.append(',');
 		}
 		tStringBuf.append((char)this.mData[z]);
 		message += tStringBuf.toString()+"\n";
+*/
 		return message;
 	}
 	public CanNormalFrame(){

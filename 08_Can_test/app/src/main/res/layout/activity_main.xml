@@ -16,7 +16,7 @@
             android:layout_weight="1"
             android:layout_height="fill_parent"
             ></EditText>
-        <EditText android:id="@+id/can1Recvtext"
+        <EditText android:id="@+id/can0Recvtext"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="fill_parent"
@@ -47,7 +47,7 @@
             android:layout_height="fill_parent"
 
             ></EditText>
-        <EditText  android:id="@+id/can0Recvtext"
+        <EditText  android:id="@+id/can1Recvtext"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="fill_parent"

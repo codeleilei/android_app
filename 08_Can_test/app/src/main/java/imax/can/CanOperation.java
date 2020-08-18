@@ -15,7 +15,7 @@ public class CanOperation {
 		this.bitrate = bitrate;
 		System.loadLibrary("QYCan");
 		Log.e("can", "load MyCantest ok");
-		//下面操作失败要处理
+		//初始化can0/1
 		if(this.CanOperationUp())
 			System.out.println("can up success");
 		else
@@ -39,7 +39,7 @@ public class CanOperation {
 	public boolean CanOperationUp() {
 		java.lang.Process por;
 		try {
-			Runtime.getRuntime().exec("ls");
+			Runtime.getRuntime().exec("/system/xbin/su");
 
 			String[] cmd = new String[]{"su","-c","ip link set "+this.canName+" down"};
 			por = Runtime.getRuntime().exec(cmd);
